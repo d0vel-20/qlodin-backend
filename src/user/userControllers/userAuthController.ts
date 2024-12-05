@@ -132,32 +132,36 @@ export const verifyUserEmail = async (req: Request, res: Response) => {
   
     // input validation
     if (!email || !password){
-      return res.status(400).json({ data: 'Please fill in all fields', status: 400 })
+      res.status(400).json({ data: 'Please fill in all fields', status: 400 })
+      return;
     }
   
     try {
       // Check if admin exists
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(400).json({ data: 'User does not exist.', status: 400 });
+        res.status(400).json({ data: 'User does not exist.', status: 400 });
+        return;
       }
   
       // Check if password matches
       const isPasswordValid = await bcrypt.compare(password, user.password );
       if (!isPasswordValid) {
-        return res.status(403).json({ data: 'Invalid credentials', status: 403 });
+        res.status(403).json({ data: 'Invalid credentials', status: 403 });
+        return;
       }
   
       // check if user is disabled
       if(user.isDisabled){
-        return res.status(403).json({ data: 'Account is disabled. Please contact support.', status: 403 });
+        res.status(403).json({ data: 'Account is disabled. Please contact support.', status: 403 });
+        return;
       }
   
           // Generate a new token for the verified user
           const token = generateToken(user._id.toString(), 'user');
   
       // Return token with the user data
-      return res.status(200).json({
+      res.status(200).json({
         status: 200,
         message: 'Login Successful',
         data:{
@@ -171,10 +175,12 @@ export const verifyUserEmail = async (req: Request, res: Response) => {
           },
         }
       });
+      return
   
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+    res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+    return;
   }
   };
 
@@ -186,7 +192,8 @@ export const verifyUserEmail = async (req: Request, res: Response) => {
   
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(404).json({ data: 'User not found', status: 404 });
+        res.status(404).json({ data: 'User not found', status: 404 });
+        return;
       }
   
       const resetCode = generateSixDigitCode();
@@ -201,7 +208,8 @@ export const verifyUserEmail = async (req: Request, res: Response) => {
       res.status(200).json({ data: 'Reset code sent to email.', status: 200 });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+        res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+        return;
     }
   };
 
@@ -212,7 +220,8 @@ export const verifyUserEmail = async (req: Request, res: Response) => {
       // Check if admin exists
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(404).json({ data: 'User not found', status: 404 });
+        res.status(404).json({ data: 'User not found', status: 404 });
+        return;
       }
   
       // Generate a new reset code and set expiration
@@ -226,10 +235,12 @@ export const verifyUserEmail = async (req: Request, res: Response) => {
       // Resend reset code to email
       await sendResetPasswordEmail(email, resetCode);
   
-      return res.status(200).json({ data: 'Reset code resent to email.', status: 200 });
+      res.status(200).json({ data: 'Reset code resent to email.', status: 200 });
+      return;
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+      res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+      return;
     }
   };
 
@@ -242,18 +253,21 @@ export const resetPassword = async (req: Request, res: Response) => {
 
     // Validate input
     if (!email || !resetCode || !newPassword) {
-      return res.status(400).json({ data: 'Please fill in all fields', status: 400 });
+      res.status(400).json({ data: 'Please fill in all fields', status: 400 });
+      return;
     }
 
     // Find the admin by email and verify reset code
     const user = await User.findOne({ email, resetCode });
     if (!user) {
-      return res.status(404).json({ data: 'Invalid reset code or email.', status: 404 });
+      res.status(404).json({ data: 'Invalid reset code or email.', status: 404 });
+      return;
     }
 
     // Check if the reset code has expired
     if (user.resetCodeExpires && user.resetCodeExpires < new Date()) {
-      return res.status(400).json({ data: 'Reset code has expired.', status: 400 });
+      res.status(400).json({ data: 'Reset code has expired.', status: 400 });
+      return;
     }
 
     // Hash the new password
@@ -265,10 +279,12 @@ export const resetPassword = async (req: Request, res: Response) => {
     user.resetCodeExpires = undefined;
     await user.save();
 
-    return res.status(200).json({ data: 'Password reset successful.', status: 200 });
+    res.status(200).json({ data: 'Password reset successful.', status: 200 });
+    return;
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+    res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+    return;
   }
 };
 

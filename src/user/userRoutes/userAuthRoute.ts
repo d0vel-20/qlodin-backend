@@ -16,6 +16,10 @@ const router = Router();
 // User Auth Routes
 router.post('/register', registerUser, Validators.registerValidationRules);
 router.post('/verify-email', verifyUserEmail );
+router.post('/login', loginUser);
+router.post('/forgot-password', forgotPassword);
+router.post('/resend-reset-code', resendResetCode);
+router.post('/reset-password', resetPassword);
 
 
 export default router;
