@@ -59,6 +59,7 @@ export const registerUser = async (req:Request, res: Response) => {
             status: 201,
             message: 'Registration successful. Please verify your email using the OTP sent.',
             data:{
+              token,
               user: {
                 _id: user._id,
                 email: user.email,
@@ -128,7 +129,7 @@ export const verifyUserEmail = async (req: Request, res: Response) => {
   
   // user login
   export const loginUser = async (req:Request, res:Response) =>{
-    const {email, password, isDisabled} = req.body;
+    const {email, password} = req.body;
   
     // input validation
     if (!email || !password){

@@ -124,30 +124,34 @@ const verifyUserEmail = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.verifyUserEmail = verifyUserEmail;
 // user login
 const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { email, password, isDisabled } = req.body;
+    const { email, password } = req.body;
     // input validation
     if (!email || !password) {
-        return res.status(400).json({ data: 'Please fill in all fields', status: 400 });
+        res.status(400).json({ data: 'Please fill in all fields', status: 400 });
+        return;
     }
     try {
         // Check if admin exists
         const user = yield userModel_1.default.findOne({ email });
         if (!user) {
-            return res.status(400).json({ data: 'User does not exist.', status: 400 });
+            res.status(400).json({ data: 'User does not exist.', status: 400 });
+            return;
         }
         // Check if password matches
         const isPasswordValid = yield bcryptjs_1.default.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(403).json({ data: 'Invalid credentials', status: 403 });
+            res.status(403).json({ data: 'Invalid credentials', status: 403 });
+            return;
         }
         // check if user is disabled
         if (user.isDisabled) {
-            return res.status(403).json({ data: 'Account is disabled. Please contact support.', status: 403 });
+            res.status(403).json({ data: 'Account is disabled. Please contact support.', status: 403 });
+            return;
         }
         // Generate a new token for the verified user
         const token = (0, generateToken_1.generateToken)(user._id.toString(), 'user');
         // Return token with the user data
-        return res.status(200).json({
+        res.status(200).json({
             status: 200,
             message: 'Login Successful',
             data: {
@@ -161,10 +165,12 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 },
             }
         });
+        return;
     }
     catch (error) {
         console.error(error);
-        return res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+        res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+        return;
     }
 });
 exports.loginUser = loginUser;
@@ -173,7 +179,8 @@ const forgotPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         const { email } = req.body;
         const user = yield userModel_1.default.findOne({ email });
         if (!user) {
-            return res.status(404).json({ data: 'User not found', status: 404 });
+            res.status(404).json({ data: 'User not found', status: 404 });
+            return;
         }
         const resetCode = (0, generateOtp_1.generateSixDigitCode)();
         const resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // Code expires in 15 minutes
@@ -185,7 +192,8 @@ const forgotPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
     }
     catch (error) {
         console.error(error);
-        return res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+        res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+        return;
     }
 });
 exports.forgotPassword = forgotPassword;
@@ -195,7 +203,8 @@ const resendResetCode = (req, res) => __awaiter(void 0, void 0, void 0, function
         // Check if admin exists
         const user = yield userModel_1.default.findOne({ email });
         if (!user) {
-            return res.status(404).json({ data: 'User not found', status: 404 });
+            res.status(404).json({ data: 'User not found', status: 404 });
+            return;
         }
         // Generate a new reset code and set expiration
         const resetCode = (0, generateOtp_1.generateSixDigitCode)();
@@ -205,11 +214,13 @@ const resendResetCode = (req, res) => __awaiter(void 0, void 0, void 0, function
         yield user.save();
         // Resend reset code to email
         yield (0, emailService_1.sendResetPasswordEmail)(email, resetCode);
-        return res.status(200).json({ data: 'Reset code resent to email.', status: 200 });
+        res.status(200).json({ data: 'Reset code resent to email.', status: 200 });
+        return;
     }
     catch (error) {
         console.error(error);
-        return res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+        res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+        return;
     }
 });
 exports.resendResetCode = resendResetCode;
@@ -219,16 +230,19 @@ const resetPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const { email, resetCode, newPassword } = req.body;
         // Validate input
         if (!email || !resetCode || !newPassword) {
-            return res.status(400).json({ data: 'Please fill in all fields', status: 400 });
+            res.status(400).json({ data: 'Please fill in all fields', status: 400 });
+            return;
         }
         // Find the admin by email and verify reset code
         const user = yield userModel_1.default.findOne({ email, resetCode });
         if (!user) {
-            return res.status(404).json({ data: 'Invalid reset code or email.', status: 404 });
+            res.status(404).json({ data: 'Invalid reset code or email.', status: 404 });
+            return;
         }
         // Check if the reset code has expired
         if (user.resetCodeExpires && user.resetCodeExpires < new Date()) {
-            return res.status(400).json({ data: 'Reset code has expired.', status: 400 });
+            res.status(400).json({ data: 'Reset code has expired.', status: 400 });
+            return;
         }
         // Hash the new password
         const hashedPassword = yield bcryptjs_1.default.hash(newPassword, 10);
@@ -237,11 +251,13 @@ const resetPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         user.resetCode = undefined;
         user.resetCodeExpires = undefined;
         yield user.save();
-        return res.status(200).json({ data: 'Password reset successful.', status: 200 });
+        res.status(200).json({ data: 'Password reset successful.', status: 200 });
+        return;
     }
     catch (error) {
         console.error(error);
-        return res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+        res.status(500).json({ data: 'Internal Server Error', status: 500, error });
+        return;
     }
 });
 exports.resetPassword = resetPassword;
