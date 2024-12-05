@@ -1,5 +1,5 @@
 git add .
 
-git commit -m "fixed send email"
+git commit -m "update"
 
 git push origin main

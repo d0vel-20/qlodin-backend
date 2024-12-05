@@ -63,6 +63,7 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             status: 201,
             message: 'Registration successful. Please verify your email using the OTP sent.',
             data: {
+                token,
                 user: {
                     _id: user._id,
                     email: user.email,
