@@ -1,5 +1,5 @@
 git add .
 
-git commit -m "added login controller"
+git commit -m "fixed send email"
 
 git push origin main
