@@ -1,13 +1,16 @@
 import express from 'express';
+import morgan from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import morgan from 'morgan';
-import connectDB from './src/database/database';
+import connectDB from './database/database';
 import { log } from 'console';
+import userRoutes from './user/userRoutes/userAuthRoute';
+import mongoose from 'mongoose';
 
 const app = express();
 
 dotenv.config();
+
 
 const PORT = process.env.PORT || 5000;
 
@@ -17,16 +20,21 @@ const startApp = async ()=>{
     app.use(express.json());
     app.use(express.urlencoded({extended: true}));
 
+  
+
 
     app.listen(PORT, ()=>{
         console.log(`server running on port ${PORT}`);
         
     });
 
-    await connectDB;
+         
+      await connectDB();
+    
+
 
     // ROUTES ==============================================================
-
+    app.use('/api/user/auth', userRoutes);
 
 
     // 404 route

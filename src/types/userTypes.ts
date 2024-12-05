@@ -1,4 +1,5 @@
 import { Document, Types } from 'mongoose';
+import { UserRole } from './roles';
 
 export interface IUser extends Document {
     _id: Types.ObjectId;
@@ -8,11 +9,21 @@ export interface IUser extends Document {
     email: string;
     password: string;
     profilePicture: string;
+    isPremium?: boolean;
+    isDisabled?: boolean;
     isVerified?: boolean;
     createdAt: Date;
     otp: string;
     otpExpires: Date;
     resetCode?: string;
     resetCodeExpires?: Date;
-    role: string;
   }
+
+
+  export interface AuthenticatedRequest extends Request {
+    user?: {
+      id: string;
+      role: string;
+    };
+  }
+
